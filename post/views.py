@@ -9,12 +9,13 @@ from rest_framework.response import Response
 from rest_framework import pagination
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
+from django.db.models import Q
 
 from post.utils import generate_access_token
 from .serializers import  *
 from .models import *
 
-# user = authenticate(username="john", password="secret")
+
 class LoginView(APIView):
   
     permission_classes = [AllowAny]
@@ -58,14 +59,6 @@ class CustomPagination(pagination.PageNumberPagination):
             'post': data1,
            },
         status=status.HTTP_200_OK)
-
-
-
-class PostList(generics.ListCreateAPIView):
-    queryset = Post.objects.all()
-  
-    serializer_class = PostListSerializer
-    permission_classes = [IsAuthenticated]
         
 
 
@@ -74,6 +67,17 @@ class PostListCreateAPIView(generics.GenericAPIView):
     pagination_class = CustomPagination
 
     def get(self, request):
+        
+        if request.GET.get("search"):
+            postData = Post.objects.filter( Q(body=request.GET["search"]) | Q(title=request.GET["search"]))
+            serializer = PostSerializer(postData, many=True)
+
+            postDeta = self.paginate_queryset(serializer.data)
+            
+            postDeta = self.get_paginated_response(postDeta)
+            
+            return postDeta
+            
         postData = Post.objects.all()
         serializer = PostSerializer(postData, many=True)
 
