@@ -8,12 +8,14 @@ from .models import *
 
 
 @receiver(post_save,sender=Post)
-def send_mail(sender,instance,created,**kwargs):
+def user_send_mail(sender,instance,created,**kwargs):
     if  created:
         print("post created")
         instance1= str(instance.author.email)
         Post.objects.get(id=instance.id)
-        # email_template_name = "posttemp.html"
+
+        '''  Hidden code  for send  email  in setting  email and password '''
+        # email_template_name = "posttemp.html"  
         # c = {
         #     "email": instance.author.email,
             
